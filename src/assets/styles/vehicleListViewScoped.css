@@ -1,0 +1,102 @@
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 20px 0;
+}
+
+.pagination-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Outfit', sans-serif;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--black-cherry);
+    border-color: var(--black-cherry-light);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-cherry);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.page-current {
+    color: var(--black-cherry-glow);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.page-separator {
+    color: var(--text-dim);
+}
+
+.page-total {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 100px 30px;
+  background: var(--glass);
+  border-radius: var(--radius-2xl);
+  border: 2px dashed var(--glass-border);
+  margin-top: 40px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  color: var(--text-main);
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.create-btn-empty {
+  background: linear-gradient(135deg, var(--black-cherry) 0%, var(--black-cherry-vibrant) 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'Outfit', sans-serif;
+  box-shadow: var(--shadow-cherry);
+  letter-spacing: 0.5px;
+}
+
+.create-btn-empty:hover {
+  background: linear-gradient(135deg, var(--black-cherry-vibrant) 0%, var(--black-cherry-glow) 100%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-cherry-lg);
+}
