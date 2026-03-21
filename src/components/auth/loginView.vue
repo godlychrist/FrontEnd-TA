@@ -20,10 +20,29 @@
             </div>
 
             <form @submit.prevent="handleSubmit" class="auth-form">
+              <!-- Solo para Registro: Pedir Cédula (Requerimiento Cris) -->
+              <authInput 
+                v-if="!isLogin"
+                id="cedula"
+                v-model="form.cedula"
+                label="Cédula de Identidad"
+                required
+              />
+
               <authInput 
                 id="username"
                 v-model="form.username"
                 label="Usuario"
+                required
+              />
+
+              <!-- Solo para Registro: Pedir Email -->
+              <authInput 
+                v-if="!isLogin"
+                id="email"
+                v-model="form.email"
+                type="email"
+                label="Correo Electrónico"
                 required
               />
 
