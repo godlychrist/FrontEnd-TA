@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import loginView from '../components/auth/loginView.vue';
+import verifyEmailView from '../components/auth/verifyEmailView.vue';
 import vehicleListView from '../components/vehicles/vehicleListView.vue';
 import vehicleDetailView from '../components/vehicles/vehicleDetailView.vue';
 import messagesView from '../components/messages/messagesView.vue';
@@ -15,6 +16,11 @@ const router = createRouter({
             path: '/login',
             name: 'login',
             component: loginView
+        },
+        {
+            path: '/verify-email',
+            name: 'verify-email',
+            component: verifyEmailView
         },
         {
             path: '/vehicles',
@@ -33,11 +39,12 @@ const router = createRouter({
         }
     ]
 })
+
 router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token');
     
     // Rutas públicas que no requieren token
-    const publicPages = ['login', 'vehicles', 'vehicle-detail'];
+    const publicPages = ['login', 'vehicles', 'vehicle-detail', 'verify-email'];
     const authRequired = !publicPages.includes(to.name);
 
     if (authRequired && !token) {
