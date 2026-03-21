@@ -21,6 +21,13 @@
 
             <form @submit.prevent="handleSubmit" class="auth-form">
               <authInput 
+                v-if="!isLogin"
+                id="cedula"
+                v-model="form.cedula"
+                label="Cedula"
+                required
+              />
+              <authInput 
                 id="username"
                 v-model="form.username"
                 label="Usuario"
