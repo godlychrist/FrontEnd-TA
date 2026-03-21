@@ -1,45 +1,42 @@
+<!--
+  messagesView.vue - Sistema de mensajería completo.
+
+  Layout tipo WhatsApp/Messenger: sidebar con lista de conversaciones
+  y área principal de chat con hilo de mensajes.
+  Soporta: selección de conversación, envío de mensajes con Enter,
+  detección de mensajes propios vs ajenos, apertura directa por query param,
+  y toast de errores con auto-dismiss.
+-->
 <script setup>
-import { onMounted, ref } from 'vue';
+// Vista protegida: Centro de Mensajería y Chats activos
+import { onMounted, ref, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useMessages } from '@/composables/useMessages';
 
 const router = useRouter();
 const route = useRoute();
+const scrollContainer = ref(null);
+
 const { 
-  loadConversations, 
-  conversations, 
-  loading, 
-  loadConversation, 
-  activeConversation,
-  messages,
-  sendMessage,
-  error
+  loadConversations, conversations, loading, loadConversation, 
+  activeConversation, messages, sendMessage, error,
+  currentUserId, formatTime, getOtherUser
 } = useMessages();
 
-// El login guarda: localStorage.setItem('userId', response.user.id) => string puro
-const currentUserId = localStorage.getItem('userId') || '';
-
-const formatTime = (dateValue) => {
-  // last_message_at llega como [] (array vacío) si no hay fecha aún
-  if (!dateValue || Array.isArray(dateValue) || typeof dateValue !== 'string') return '';
-  try {
-    const date = new Date(dateValue);
-    if (isNaN(date.getTime())) return '';
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-  } catch (e) {
-    return '';
+/**
+ * Auto-scroll al fondo del chat cuando cambian los mensajes
+ */
+const scrollToBottom = async () => {
+  await nextTick();
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
   }
 };
 
-const getOtherUser = (conv) => {
-  if (!conv) return { username: '...' };
-  // buyer_id y seller_id llegan como strings puros del backend (gracias al cast)
-  // currentUserId también es string puro (del login)
-  if (conv.buyer_id === currentUserId) {
-    return conv.seller ?? { username: 'Usuario' };
-  }
-  return conv.buyer ?? { username: 'Usuario' };
-};
+// Observar cambios en el hilo de mensajes para bajar el scroll automáticamente
+watch(() => messages.value, () => {
+  scrollToBottom();
+}, { deep: true });
 
 const newMessage = ref('');
 
@@ -47,26 +44,32 @@ const goBack = () => {
     router.push('/vehicles');
 };
 
+/** Al montar: cargar conversaciones y abrir la indicada por query param (si existe) */
 onMounted(async () => {
   await loadConversations();
   if (route.query.id) {
+    // Restaurar último chat abierto si el enlace tiene ID
     await loadConversation(route.query.id);
+    scrollToBottom();
   }
 });
 
+/** Seleccionar una conversación y actualizar la URL con su ID */
 const selectConversation = async (id) => {
   await loadConversation(id);
   router.push({ query: { id } });
+  scrollToBottom();
 };
 
+/** Enviar mensaje y limpiar el input. Si falla, auto-dismiss del error en 3s */
 const handleSendMessage = async () => {
   if (!newMessage.value.trim() || !activeConversation.value) return;
   
   const sent = await sendMessage(activeConversation.value._id, newMessage.value);
   if (sent) {
-    newMessage.value = '';
+    newMessage.value = ''; // Reset input
+    scrollToBottom();
   } else {
-    // Limpia el error después de 3 segundos
     setTimeout(() => { if(error) error.value = null; }, 3000);
   }
 };
@@ -146,7 +149,8 @@ const handleSendMessage = async () => {
               </div>
             </header>
 
-            <div class="messages-thread">
+            <!-- HILO DE MENSAJES -->
+            <div class="messages-thread" ref="scrollContainer" id="chat-thread">
               <!-- Mensaje de Bienvenida si no hay mensajes -->
               <div v-if="messages.length === 0" class="welcome-hint">
                 <div class="hint-card">
