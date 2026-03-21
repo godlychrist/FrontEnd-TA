@@ -8,6 +8,7 @@ export function useAuth() {
     const isLogin = ref(true);
 
     const form = reactive({
+        cedula: '',
         username: '',
         password: '',
         confirmPassword: '',
@@ -40,6 +41,7 @@ export function useAuth() {
                 }
 
                 await authService.register({
+                    cedula: form.cedula,
                     username: form.username,
                     password: form.password,
                     password_confirmation: form.confirmPassword
