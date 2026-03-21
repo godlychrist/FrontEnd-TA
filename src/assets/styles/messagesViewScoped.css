@@ -2,11 +2,11 @@
   min-height: 100vh;
   background: var(--bg-main);
   color: var(--text-main);
-  padding: 40px 24px;
+  padding: 20px 24px;
   position: relative;
 }
 
-/* Estilos de la Alerta (Toast) */
+/* --- Alerta de Error Premium --- */
 .error-toast {
   position: fixed;
   top: 90px;
@@ -17,7 +17,7 @@
   padding: 14px 28px;
   border-radius: 20px;
   z-index: 2000;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 20px rgba(149, 14, 42, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(149, 14, 42, 0.4);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -34,13 +34,16 @@
 .pop-enter-active {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
 .pop-leave-active {
   transition: all 0.3s ease-in;
 }
+
 .pop-enter-from {
   opacity: 0;
   transform: translate(-50%, -40px) scale(0.8);
 }
+
 .pop-leave-to {
   opacity: 0;
   transform: translate(-50%, -20px) scale(0.9);
@@ -51,7 +54,7 @@
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
-  margin: 0 auto 30px;
+  margin: 0 auto 20px;
 }
 
 .back-btn {
@@ -84,59 +87,76 @@
   color: var(--black-cherry);
 }
 
-/* Contenedor Principal */
+/* --- Contenedor Principal (SOLUCIÓN DEFINITIVA DE ALTURA) --- */
 .messages-container {
   max-width: 1200px;
   margin: 0 auto;
-  height: 75vh;
-  display: grid;
-  grid-template-columns: 350px 1fr;
+  height: calc(100vh - 160px) !important;
+  min-height: 500px !important;
+  display: grid !important;
+  grid-template-columns: 350px 1fr !important;
   background: rgba(15, 15, 20, 0.6);
   border-radius: var(--radius-xl);
   border: 1px solid var(--glass-border);
   overflow: hidden;
   backdrop-filter: blur(15px);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
 }
 
-/* Sidebar Estilos */
+/* --- Sidebar --- */
 .sidebar {
   border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.2);
+  height: 100%;
 }
 
 .sidebar-header {
-  padding: 25px;
+  padding: 20px;
   border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
 }
 
 .title {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: white;
   margin: 0;
 }
 
+/* --- Lista de Conversaciones con Scroll Forzado --- */
 .conversations-list {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll !important;
   padding: 15px;
+  min-height: 0;
+  display: block;
 }
 
-.loading-state {
-  text-align: center;
-  padding: 20px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+/* --- Scrollbars Universales (COLOR CEREZA SÓLIDO) --- */
+.conversations-list::-webkit-scrollbar,
+.messages-thread::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+
+.conversations-list::-webkit-scrollbar-track,
+.messages-thread::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.conversations-list::-webkit-scrollbar-thumb,
+.messages-thread::-webkit-scrollbar-thumb {
+  background: var(--black-cherry) !important;
+  border-radius: 5px !important;
 }
 
 .conv-item {
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 15px;
+  padding: 12px;
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -154,22 +174,21 @@
 }
 
 .avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: var(--black-cherry-gradient);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(139, 26, 74, 0.3);
 }
 
 .avatar.sm {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   font-size: 0.8rem;
 }
 
@@ -181,88 +200,70 @@
 .conv-name {
   display: block;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-main);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .conv-last-msg {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Chat Area Estilos */
+/* --- Chat Area --- */
 .chat-area {
   display: flex;
   flex-direction: column;
   background: radial-gradient(circle at center, rgba(149, 14, 42, 0.03), transparent);
   height: 100%;
-  overflow: hidden;
 }
 
 .chat-main {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  position: relative !important;
 }
 
 .chat-header {
-  padding: 15px 25px;
-  background: rgba(0,0,0,0.2);
+  padding: 10px 25px;
+  background: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   gap: 15px;
+  flex-shrink: 0;
 }
 
 .chat-meta h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: white;
 }
 
 .status {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--black-cherry-glow);
 }
 
+/* --- Hilo de Mensajes con Scroll Forzado --- */
 .messages-thread {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 !important;
+  overflow-y: scroll !important;
   padding: 25px;
   display: flex;
   flex-direction: column;
   gap: 15px;
   min-height: 0;
+  scroll-behavior: smooth;
 }
 
-.welcome-hint {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hint-card {
-  background: var(--glass);
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  max-width: 300px;
-  color: var(--text-muted);
-  border: 1px solid var(--glass-border);
-}
-
-.hint-card svg {
-  margin-bottom: 15px;
-  opacity: 0.3;
-}
-
+/* --- Burbujas de Chat --- */
 .msg-wrapper {
   max-width: 75%;
   display: flex;
@@ -281,76 +282,63 @@
 }
 
 .bubble {
-  padding: 12px 18px;
-  border-radius: 20px;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 0.9rem;
 }
 
 .sent .bubble {
   background: var(--black-cherry);
   color: white;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 2px;
 }
 
 .received .bubble {
   background: var(--glass-light);
   border: 1px solid var(--glass-border);
-  border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 2px;
 }
 
 .msg-time {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--text-dim);
 }
 
+/* --- BARRA DE TEXTO (SOLUCIÓN STICKY AL FONDO) --- */
 .chat-input-area {
-  padding: 20px 25px;
-  background: rgba(0,0,0,0.3);
-  border-top: 1px solid var(--glass-border);
-  display: flex;
-  gap: 15px;
+  flex-shrink: 0 !important;
+  background: #111 !important;
+  /* Color oscuro sólido */
+  border-top: 3px solid var(--black-cherry) !important;
+  padding: 15px 25px;
+  display: flex !important;
+  gap: 12px;
+  z-index: 1000;
+  width: 100%;
 }
 
 .message-input {
-  flex: 1;
-  background: rgba(255,255,255,0.05);
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
-  padding: 12px 20px;
-  border-radius: 14px;
+  padding: 10px 18px;
+  border-radius: 12px;
   color: white;
   outline: none;
   font-family: inherit;
-  transition: 0.3s;
-}
-
-.message-input:focus {
-  border-color: var(--black-cherry);
-  background: rgba(255,255,255,0.1);
 }
 
 .send-btn {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: var(--black-cherry);
   color: white;
   border: none;
-  border-radius: 14px;
-  display: flex;
+  border-radius: 12px;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: 0.3s;
-}
-
-.send-btn:hover:not(:disabled) {
-  background: var(--black-cherry-vibrant);
-  transform: scale(1.05);
-}
-
-.send-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }
 
 .placeholder {
@@ -363,20 +351,8 @@
   padding: 40px;
 }
 
-.empty-inbox {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-
-.empty-inbox p {
-  margin-top: 10px;
-  font-size: 0.9rem;
-}
-
 @media (max-width: 900px) {
   .messages-container {
     grid-template-columns: 1fr;
-    height: 85vh;
   }
 }
