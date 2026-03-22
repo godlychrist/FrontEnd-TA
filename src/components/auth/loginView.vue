@@ -21,13 +21,6 @@
 
             <form @submit.prevent="handleSubmit" class="auth-form">
               <!-- Solo para Registro: Pedir Cédula (Requerimiento Cris) -->
-              <authInput 
-                v-if="!isLogin"
-                id="cedula"
-                v-model="form.cedula"
-                label="Cédula de Identidad"
-                required
-              />
 
               <authInput 
                 v-if="!isLogin"
