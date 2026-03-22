@@ -10,6 +10,7 @@ export function useAuth() {
     const form = reactive({
         cedula: '',
         username: '',
+        email: '',
         password: '',
         confirmPassword: '',
         rememberMe: false
@@ -33,7 +34,6 @@ export function useAuth() {
                 }
 
             } else {
-                // Validación de contraseña corta en el cliente
                 if (form.password.length < 6) {
                     error.value = "La contraseña debe tener al menos 6 dígitos";
                     isLoading.value = false;
@@ -43,12 +43,16 @@ export function useAuth() {
                 await authService.register({
                     cedula: form.cedula,
                     username: form.username,
+                    email: form.email,
                     password: form.password,
                     password_confirmation: form.confirmPassword
                 });
-                alert("¡Registrado!");
+                alert("¡Te enviamos un correo para activar tu cuenta!");
                 isLogin.value = true;
+                // Limpiar campos
+                form.cedula = '';
                 form.username = '';
+                form.email = '';
                 form.password = '';
                 form.confirmPassword = '';
             }
