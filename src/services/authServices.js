@@ -10,7 +10,19 @@ const login = async (user) => {
     return response.data;
 };
 
+const getGoogleUrl = async () => {
+    const response = await api.get('/auth/google');
+    return response.data;
+};
+
+const checkCedula = async (cedula) => {
+    const response = await api.get(`/check-cedula/${cedula}`);
+    return response.data;
+};
+
 export default {
     register,
-    login
+    login,
+    getGoogleUrl,
+    checkCedula
 };
