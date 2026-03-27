@@ -1,6 +1,7 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import authService from '@/services/authServices.js';
 import router from '@/router';
+import { useRoute } from 'vue-router';
 
 export function useAuth() {
     const error = ref(null);
@@ -14,6 +15,47 @@ export function useAuth() {
         password: '',
         confirmPassword: '',
         rememberMe: false
+    });
+
+    const route = useRoute();
+    const legalName = ref('');
+
+    // --- RADAR DE CÉDULA (Autocompletar) ---
+    watch(() => form.cedula, async (newCedula) => {
+        if (newCedula && newCedula.length >= 9) {
+            try {
+                const response = await authService.checkCedula(newCedula);
+                if (response.nombre) {
+                    legalName.value = response.nombre;
+                }
+            } catch (err) {
+                legalName.value = '';
+            }
+        } else {
+            legalName.value = '';
+        }
+    });
+
+    onMounted(() => {
+        // 1. CASO LOGIN EXITOSO: Google nos manda el token por URL
+        const token = route.query.token;
+        const username = route.query.username;
+        const id = route.query.id;
+
+        if (token) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify({ username, id }));
+            localStorage.setItem('userId', id);
+            router.push('/vehicles');
+        }
+
+        // 2. CASO USUARIO NUEVO: Google nos manda email y nombre para REGISTRO
+        if (route.query.is_google === 'true') {
+            isLogin.value = false; // Cambiamos a modo Registro
+            form.email = route.query.google_email || '';
+            form.username = (route.query.google_name || '').replace(/\s+/g, '').toLowerCase(); // Usuario sugerido
+            // Dejamos la cédula vacía (REQUERIMIENTO: Pedirla al usuario)
+        }
     });
 
     const toggleAuthMode = () => {
@@ -79,5 +121,17 @@ export function useAuth() {
         localStorage.removeItem('user');
         router.push('/login');
     }
-    return { form, isLogin, isLoading, error, toggleAuthMode, handleSubmit, handleLogout };
+
+    const initGoogleLogin = async () => {
+        try {
+            const response = await authService.getGoogleUrl();
+            if (response.url) {
+                window.location.href = response.url;
+            }
+        } catch (err) {
+            error.value = "Error al redireccionar a Google";
+        }
+    };
+
+    return { form, isLogin, isLoading, error, legalName, toggleAuthMode, handleSubmit, handleLogout, initGoogleLogin };
 }
