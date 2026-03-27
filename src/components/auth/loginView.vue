@@ -20,7 +20,7 @@
             </div>
 
             <form @submit.prevent="handleSubmit" class="auth-form">
-              <!-- Solo para Registro: Pedir Cédula (Requerimiento Cris) -->
+              <!-- Solo para Registro: Pedir Cédula (Requerimiento Cris/Bladimir) -->
               <authInput 
                 v-if="!isLogin"
                 id="cedula"
@@ -28,6 +28,11 @@
                 label="Cédula de Identidad"
                 required
               />
+
+              <!-- MENSAJE DE AUTOCOMPLETADO (NOMBRE LEGAL - Requerimiento Bladimir) -->
+              <div v-if="legalName && !isLogin" class="welcome-legal-name">
+                <span class="pulse-icon">✅</span> Bienvenido/a, <strong>{{ legalName }}</strong>
+              </div>
 
               <authInput 
                 id="username"
@@ -63,8 +68,6 @@
                 required
               />
 
-
-
               <div v-if="error" class="login-error">
                 {{ error }}
               </div>
@@ -74,6 +77,17 @@
                   {{ isLoading ? 'PROCESANDO...' : (isLogin ? 'INICIAR SESIÓN' : 'REGISTRARME') }}
                 </span>
               </button>
+
+              <!-- Botón de Google -->
+              <div class="google-login-container">
+                  <div class="separator">
+                      <span>O continúa con</span>
+                  </div>
+                  <button type="button" @click="initGoogleLogin" class="google-btn">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
+                      Google
+                  </button>
+              </div>
             </form>
 
             <div class="footer-links">
@@ -89,8 +103,6 @@
                 <a href="#" @click.prevent="$router.push('/vehicles')" class="link outline explore-btn">Explorar sin cuenta 🔍</a>
               </p>
             </div>
-            
-
           </div>
         </div>
 
@@ -102,13 +114,10 @@
 <script setup>
 import authBrandSide from './authBrandSide.vue';
 import authInput from './authInput.vue';
-
 import { useAuth } from '@/composables/useAuth.js';
 
-const { form, isLogin, isLoading, error, handleSubmit } = useAuth();
-
+const { form, isLogin, isLoading, error, legalName, handleSubmit, initGoogleLogin } = useAuth();
 </script>
 
 <style src="../../assets/styles/auth.css"></style>
-
 <style scoped src="../../assets/styles/loginViewScoped.css"></style>
