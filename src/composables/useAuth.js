@@ -7,13 +7,16 @@ export function useAuth() {
     const error = ref(null);
     const isLoading = ref(false);
     const isLogin = ref(true);
+    const requires2FA = ref(false);
 
     const form = reactive({
         cedula: '',
         username: '',
         email: '',
+        phone: '', // REQUERIMIENTO: Teléfono para 2FA
         password: '',
         confirmPassword: '',
+        twoFactorCode: '', // Nuevo campo para el código de 6 dígitos
         rememberMe: false
     });
 
@@ -60,6 +63,7 @@ export function useAuth() {
 
     const toggleAuthMode = () => {
         isLogin.value = !isLogin.value;
+        requires2FA.value = false; // Resetear 2FA al cambiar de modo
     };
 
     const handleSubmit = async () => {
@@ -68,6 +72,14 @@ export function useAuth() {
         try {
             if (isLogin.value) {
                 const response = await authService.login(form);
+                
+                // --- 🔐 LOGICA 2FA (Paso 1) ---
+                if (response.requires_2fa) {
+                    requires2FA.value = true;
+                    // message -> response.message (opcional mostrar)
+                    return;
+                }
+
                 if (response.token) {
                     localStorage.setItem('token', response.token);
                     localStorage.setItem('user', JSON.stringify(response.user));
@@ -86,6 +98,7 @@ export function useAuth() {
                     cedula: form.cedula,
                     username: form.username,
                     email: form.email,
+                    phone: form.phone, // Enviamos el teléfono en el registro
                     password: form.password,
                     password_confirmation: form.confirmPassword
                 });
@@ -95,6 +108,7 @@ export function useAuth() {
                 form.cedula = '';
                 form.username = '';
                 form.email = '';
+                form.phone = '';
                 form.password = '';
                 form.confirmPassword = '';
             }
@@ -110,12 +124,37 @@ export function useAuth() {
 
             // Limpiar campos para que el usuario reintente
             form.password = '';
-            // Si quieres limpiar también el username opcionalmente:
-            // form.username = ''; 
         } finally {
             isLoading.value = false;
         }
     };
+
+    /**
+     * Paso 2: Verificar el código 2FA y loguear definitivamente.
+     */
+    const handleVerify2FA = async () => {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            const response = await authService.verify2FA({
+                username: form.username,
+                code: form.twoFactorCode
+            });
+
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('userId', response.user.id);
+                router.push('/vehicles');
+            }
+        } catch (err) {
+            error.value = err.response?.data?.error || "Código incorrecto";
+            form.twoFactorCode = ''; // Limpiar código fallido
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -133,5 +172,17 @@ export function useAuth() {
         }
     };
 
-    return { form, isLogin, isLoading, error, legalName, toggleAuthMode, handleSubmit, handleLogout, initGoogleLogin };
+    return { 
+        form, 
+        isLogin, 
+        requires2FA, // Exportar flag
+        isLoading, 
+        error, 
+        legalName, 
+        toggleAuthMode, 
+        handleSubmit, 
+        handleVerify2FA, // Exportar nueva función
+        handleLogout, 
+        initGoogleLogin 
+    };
 }
