@@ -5,6 +5,7 @@
       :id="id" 
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
+      v-bind="$attrs"
       placeholder=" "
     />
     <label :for="id">{{ label }}</label>
