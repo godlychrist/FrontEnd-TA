@@ -14,13 +14,40 @@
         <div class="form-side">
           <div class="form-content">
             
-            <div class="header-text">
-              <h2>{{ isLogin ? 'Bienvenido' : 'Crear Cuenta' }}</h2>
-              <p>{{ isLogin ? 'Inicia sesión para continuar con tu viaje.' : 'Únete a la flota más exclusiva.' }}</p>
+            <!-- CASO : PANTALLA DE CÓDIGO 2FA -->
+            <div v-if="requires2FA" class="auth-form 2fa-flow">
+              <div class="header-text">
+                <h2>Verificación de Seguridad</h2>
+                <p>Ingresa el código de 6 dígitos enviado a tu celular.</p>
+              </div>
+
+              <authInput 
+                id="twoFactorCode"
+                v-model="form.twoFactorCode"
+                label="Código de Seguridad"
+                placeholder="000000"
+                maxlength="6"
+                required
+              />
+
+              <div v-if="error" class="login-error">
+                {{ error }}
+              </div>
+
+              <button @click="handleVerify2FA" class="submit-btn" :disabled="isLoading">
+                <span class="btn-text">
+                  {{ isLoading ? 'VERIFICANDO...' : 'VERIFICAR CÓDIGO' }}
+                </span>
+              </button>
+
+              <div class="footer-links">
+                <a href="#" @click.prevent="requires2FA = false" class="link red">Volver al login</a>
+              </div>
             </div>
 
-            <form @submit.prevent="handleSubmit" class="auth-form">
-              <!-- Solo para Registro: Pedir Cédula (Requerimiento Cris/Bladimir) -->
+            <!-- CASO 🏠: LOGIN O REGISTRO NORMAL -->
+            <form v-else @submit.prevent="handleSubmit" class="auth-form">
+              <!-- Solo para Registro: Pedir Cédula  -->
               <authInput 
                 v-if="!isLogin"
                 id="cedula"
@@ -48,6 +75,17 @@
                 v-model="form.email"
                 type="email"
                 label="Correo Electrónico"
+                required
+              />
+
+              <!-- Solo para Registro: Pedir Teléfono (REQUERIMIENTO 2FA) -->
+              <authInput 
+                v-if="!isLogin"
+                id="phone"
+                v-model="form.phone"
+                type="tel"
+                label="Número Telefónico"
+                placeholder="+506 0000 0000"
                 required
               />
 
@@ -88,21 +126,21 @@
                       Google
                   </button>
               </div>
+              
+              <div class="footer-links">
+                <p v-if="isLogin">
+                  ¿No tienes una cuenta? 
+                  <a href="#" @click.prevent="isLogin = false" class="link red">Únete a la flota</a>
+                </p>
+                <p v-else>
+                  ¿Ya eres parte de TicoAutos? 
+                  <a href="#" @click.prevent="isLogin = true" class="link red">Inicia Sesión</a>
+                </p>
+                <p class="explore-without-account-wrapper">
+                  <a href="#" @click.prevent="$router.push('/vehicles')" class="link outline explore-btn">Explorar sin cuenta 🔍</a>
+                </p>
+              </div>
             </form>
-
-            <div class="footer-links">
-              <p v-if="isLogin">
-                ¿No tienes una cuenta? 
-                <a href="#" @click.prevent="isLogin = false" class="link red">Únete a la flota</a>
-              </p>
-              <p v-else>
-                ¿Ya eres parte de TicoAutos? 
-                <a href="#" @click.prevent="isLogin = true" class="link red">Inicia Sesión</a>
-              </p>
-              <p class="explore-without-account-wrapper">
-                <a href="#" @click.prevent="$router.push('/vehicles')" class="link outline explore-btn">Explorar sin cuenta 🔍</a>
-              </p>
-            </div>
           </div>
         </div>
 
@@ -116,7 +154,17 @@ import authBrandSide from './authBrandSide.vue';
 import authInput from './authInput.vue';
 import { useAuth } from '@/composables/useAuth.js';
 
-const { form, isLogin, isLoading, error, legalName, handleSubmit, initGoogleLogin } = useAuth();
+const { 
+  form, 
+  isLogin, 
+  requires2FA, 
+  isLoading, 
+  error, 
+  legalName, 
+  handleSubmit, 
+  handleVerify2FA, 
+  initGoogleLogin 
+} = useAuth();
 </script>
 
 <style src="../../assets/styles/auth.css"></style>
