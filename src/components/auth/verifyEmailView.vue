@@ -27,7 +27,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import { useAuth } from '@/composables/useAuth.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -35,31 +35,24 @@ const loading = ref(true);
 const success = ref(false);
 const message = ref('');
 
+const { handleVerifyEmail } = useAuth();
+
 onMounted(async () => {
-  const token = route.query.token;
+  const token = route.query.email_token;
 
   if (!token) {
     loading.value = false;
-    message.value = 'Token no encontrado en el correo.';
+    message.value = 'Token de activación no encontrado en el correo.';
     return;
   }
 
-  try {
-    // LLAMADO AL BACKEND (LA RUTA QUE CREAMOS EN LARAVEL)
-    const response = await axios.get(`http://localhost:8000/api/verify-email?token=${token}`);
-    
-    success.value = true;
-    message.value = response.data.message;
-  } catch (error) {
-    success.value = false;
-    message.value = error.response?.data?.message || 'El enlace ha expirado o ya fue utilizado.';
-  } finally {
-    loading.value = false;
-  }
+  const result = await handleVerifyEmail(token);
+  success.value = result.success;
+  message.value = result.message;
+  loading.value = false;
 });
 
 const goToLogin = () => router.push('/login');
-
 </script>
 
 <style scoped>
