@@ -1,13 +1,13 @@
 import api from './api';
+import graphqlService from './graphqlService';
 
 const getAll = async (filters, page) => {
-    const response = await api.get('/vehicles', { params: { ...filters, page } });
-    return response.data;
+    return await graphqlService.getVehicles(filters, page);
 };
 
+
 const getById = async (id) => {
-    const response = await api.get(`/vehicles/${id}`);
-    return response.data;
+    return await graphqlService.getVehicleById(id);
 };
 
 const create = async (vehicle) => {
