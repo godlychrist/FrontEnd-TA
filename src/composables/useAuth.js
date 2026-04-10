@@ -8,6 +8,7 @@ export function useAuth() {
     const isLoading = ref(false);
     const isLogin = ref(true);
     const requires2FA = ref(false);
+    const userId = ref(null); // Añadido para la verificación SMS
 
     const form = reactive({
         cedula: '',
@@ -39,6 +40,41 @@ export function useAuth() {
         }
     });
 
+    const handleVerifyEmail = async (token) => {
+        isLoading.value = true;
+        error.value = null;
+        
+        // Limpiamos cualquier sesión previa para asegurar la seguridad total
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userId');
+
+        try {
+            const response = await authService.verifyEmail(token);
+            
+            // Si requiere SMS (Manual) - Redirigir a poner código
+            if (response.requires_2fa) {
+                setTimeout(() => {
+                    requires2FA.value = true;
+                    form.username = response.username;
+                    userId.value = response.user_id;
+                    router.push({ path: '/login', query: { requires2fa: 'true', username: response.username, user_id: response.user_id } });
+                }, 2000);
+                return { success: true, message: response.message };
+            }
+
+            // Para cualquier otro caso de éxito, simplemente mandamos al login normal
+            setTimeout(() => router.push('/login'), 2000);
+            return { success: true, message: response.message };
+        } catch (err) {
+            const msg = err.response?.data?.message || "El enlace ha expirado o no es válido";
+            error.value = msg;
+            return { success: false, message: msg };
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     onMounted(() => {
         // 1. CASO LOGIN EXITOSO: Google nos manda el token por URL
         const token = route.query.token;
@@ -52,12 +88,18 @@ export function useAuth() {
             router.push('/vehicles');
         }
 
-        // 2. CASO USUARIO NUEVO: Google nos manda email y nombre para REGISTRO
+        // 2. CASO 2FA EXTERNO: Si viene redireccionado requiriendo SMS
+        if (route.query.requires2fa === 'true') {
+            requires2FA.value = true;
+            form.username = route.query.username || '';
+            userId.value = route.query.user_id || null;
+        }
+
+        // 3. CASO USUARIO NUEVO: Registro Google
         if (route.query.is_google === 'true') {
-            isLogin.value = false; // Cambiamos a modo Registro
+            isLogin.value = false;
             form.email = route.query.google_email || '';
-            form.username = (route.query.google_name || '').replace(/\s+/g, '').toLowerCase(); // Usuario sugerido
-            // Dejamos la cédula vacía (REQUERIMIENTO: Pedirla al usuario)
+            form.username = (route.query.google_name || '').replace(/\s+/g, '').toLowerCase();
         }
     });
 
@@ -88,22 +130,37 @@ export function useAuth() {
                 }
 
             } else {
-                if (form.password.length < 6) {
+                const isGoogleRegistration = route.query.is_google === 'true';
+
+                // Solo validamos contraseña si NO es de Google (REQUERIMIENTO: Solo poner cédula)
+                if (!isGoogleRegistration && form.password.length < 6) {
                     error.value = "La contraseña debe tener al menos 6 dígitos";
                     isLoading.value = false;
                     return;
                 }
 
-                await authService.register({
+                const response = await authService.register({
                     cedula: form.cedula,
                     username: form.username,
                     email: form.email,
-                    phone: form.phone, // Enviamos el teléfono en el registro
-                    password: form.password,
-                    password_confirmation: form.confirmPassword
+                    phone: form.phone,
+                    password: isGoogleRegistration ? 'GoogleAuth123!' : form.password,
+                    password_confirmation: isGoogleRegistration ? 'GoogleAuth123!' : form.confirmPassword,
+                    is_google: isGoogleRegistration
                 });
-                alert("¡Te enviamos un correo para activar tu cuenta!");
-                isLogin.value = true;
+
+                // --- LOGICA DE REDIRECCIÓN DIRECTA ---
+                if (response.token) {
+                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('user', JSON.stringify(response.user));
+                    localStorage.setItem('userId', response.user.id);
+                    
+                    alert("¡Cuenta vinculada con éxito! Bienvenido/a.");
+                    router.push('/vehicles');
+                } else {
+                    alert("¡Registro exitoso! Te hemos enviado un correo para activar tu cuenta.");
+                    isLogin.value = true;
+                }
                 // Limpiar campos
                 form.cedula = '';
                 form.username = '';
@@ -175,13 +232,15 @@ export function useAuth() {
     return { 
         form, 
         isLogin, 
-        requires2FA, // Exportar flag
+        isGoogle: route.query.is_google === 'true', 
+        requires2FA, 
         isLoading, 
         error, 
         legalName, 
         toggleAuthMode, 
+        handleVerifyEmail, // Exportamos la nueva función
         handleSubmit, 
-        handleVerify2FA, // Exportar nueva función
+        handleVerify2FA, 
         handleLogout, 
         initGoogleLogin 
     };
