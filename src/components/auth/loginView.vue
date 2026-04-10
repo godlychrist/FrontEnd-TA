@@ -65,12 +65,13 @@
                 id="username"
                 v-model="form.username"
                 label="Usuario"
+                v-if="isLogin || (!isLogin && !isGoogle)"
                 required
               />
 
               <!-- Solo para Registro: Pedir Email -->
               <authInput 
-                v-if="!isLogin"
+                v-if="!isLogin && !isGoogle"
                 id="email"
                 v-model="form.email"
                 type="email"
@@ -80,7 +81,7 @@
 
               <!-- Solo para Registro: Pedir Teléfono (REQUERIMIENTO 2FA) -->
               <authInput 
-                v-if="!isLogin"
+                v-if="!isLogin && !isGoogle"
                 id="phone"
                 v-model="form.phone"
                 type="tel"
@@ -94,12 +95,13 @@
                 v-model="form.password"
                 type="password"
                 label="Contraseña"
+                v-if="isLogin || (!isLogin && !isGoogle)"
                 required
               />
 
               <!-- Solo para Registro -->
               <authInput 
-                v-if="!isLogin"
+                v-if="!isLogin && !isGoogle"
                 id="confirmPassword"
                 type="password"
                 label="Confirmar Contraseña"
@@ -112,12 +114,12 @@
 
               <button type="submit" class="submit-btn" :disabled="isLoading">
                 <span class="btn-text">
-                  {{ isLoading ? 'PROCESANDO...' : (isLogin ? 'INICIAR SESIÓN' : 'REGISTRARME') }}
+                  {{ isLoading ? 'PROCESANDO...' : (isLogin ? 'INICIAR SESIÓN' : (isGoogle ? 'VINCULAR CUENTA' : 'REGISTRARME')) }}
                 </span>
               </button>
 
               <!-- Botón de Google -->
-              <div class="google-login-container">
+              <div v-if="isLogin" class="google-login-container">
                   <div class="separator">
                       <span>O continúa con</span>
                   </div>
@@ -132,7 +134,7 @@
                   ¿No tienes una cuenta? 
                   <a href="#" @click.prevent="isLogin = false" class="link red">Únete a la flota</a>
                 </p>
-                <p v-else>
+                <p v-else-if="!isGoogle">
                   ¿Ya eres parte de TicoAutos? 
                   <a href="#" @click.prevent="isLogin = true" class="link red">Inicia Sesión</a>
                 </p>
@@ -157,6 +159,7 @@ import { useAuth } from '@/composables/useAuth.js';
 const { 
   form, 
   isLogin, 
+  isGoogle,
   requires2FA, 
   isLoading, 
   error, 
