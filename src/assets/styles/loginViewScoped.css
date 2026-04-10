@@ -100,3 +100,54 @@
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+/* --- ALTERNATIVE LOGIN GRID --- */
+.alternative-login-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+}
+
+.alt-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.alt-btn.google {
+    background: white;
+    color: #1f2937;
+    border: none;
+}
+
+.alt-btn.phone {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.alt-btn.phone.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.alt-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.alt-btn.google:hover {
+    background: #f9fafb;
+}
+
+.alt-btn img {
+    width: 18px;
+    height: 18px;
+}
