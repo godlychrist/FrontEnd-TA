@@ -25,10 +25,16 @@ const checkCedula = async (cedula) => {
     return response.data;
 };
 
+const verifyEmail = async (token) => {
+    const response = await api.get(`/verify-email?email_token=${token}`);
+    return response.data;
+};
+
 export default {
     register,
     login,
-    verify2FA, // Exportamos el nuevo método
+    verify2FA,
+    verifyEmail, // Añadido
     getGoogleUrl,
     checkCedula
 };
