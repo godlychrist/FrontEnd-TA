@@ -31,6 +31,7 @@ export function useAuth() {
                 const response = await authService.checkCedula(newCedula);
                 if (response.nombre) {
                     legalName.value = response.nombre;
+                    error.value = null; // Limpiar error previo
                 }
             } catch (err) {
                 legalName.value = '';
