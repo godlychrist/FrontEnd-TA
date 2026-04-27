@@ -52,7 +52,7 @@
                 v-if="!isLogin"
                 id="cedula"
                 v-model="form.cedula"
-                label="Cédula de Identidad"
+                label="Cedula"
                 required
               />
 
